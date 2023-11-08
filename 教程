@@ -1,0 +1,43 @@
+手把手教程
+如果你是新手，请按照下面的操作，可完整复原 爱妹子 网站，操作系统限定为CentOS：
+
+1. 准备好一个域名，购买可参考 Namesilo购买域名详细教程；准备一个至少100G硬盘的VPS，安装CentOS 7/8系统，购买VPS可参考：做站VPS推荐；将域名(的某个二级域名)解析到VPS；
+
+2. 下载本人开源的库：git clone https://github.com/hijkpw/94imm.git。如果提示”git: command not found”，请先安装git：yum install -y git，然后再运行命令；
+
+3. 输入 mv 94imm /var/www; cd /var/www/94imm进入程序文件夹，运行 bash install.sh 安装Mysql等软件；
+
+4. 运行 systemctl enable mariadb nginx; systemctl start mariadb启动数据库；
+
+5. 输入mysql进入Mysql命令控制台。运行下面的命令创建数据库和用户：
+
+# 用户名和密码换成你自己的，例如用户名换成 imeizi， 密码换成 123456
+create user 用户名@'%' identified by '密码';
+# 数据库名换成你自己的，例如 imeizi
+create database 数据库名 default charset utf8mb4;
+# 用上面的信息替换
+grant all privileges on 数据库名.* to 用户名@'%';
+flush privileges;
+# 退出mysql
+exit
+6. 下载爱妹子 网站已经采集好的图集、视频和数据库：wget https://d.imeizi.me/imeizi.tgz；文件有36G，可能需要一段时间，
+
+7. 解压爱妹子数据： tar -zxf imeizi.tgz；文件有点大，解压要多等一会；
+
+8. 用vim等编辑器编辑imeizi.conf文件，将文件中的imeizi.me域名换成你自己的，然后 cp imeizi.conf /etc/nginx/conf.d ，测试配置是否有问题：nginx -t，输出下面信息说明没问题：
+
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+9. 启动Nginx: systemctl start nginx；
+
+10. 将图片、视频等文件移动到网站目录：mv images /var/www/94imm/static/; mv videos /var/www/94imm/static;
+
+11. 导入数据库文件： gunzip imeizi.sql.gz; mysql 数据库名 < imeizi.sql，其中数据库是前面设置的名称，如果忘记可以用 grep -i 'database' ~/.mysql_history 查看；
+
+12. 用vim等编辑器打开config.py，将dbname、user、pass改成上面设置的数据库名、用户名和密码，将allow_url、site_name、site_url这几行中的域名和网站名称改成你自己的，其他信息也可按需修改；
+
+13. 启动网站程序：./run.sh s;
+
+14. 启动爬虫程序，每天自动抓取新图片：cd /var/www/94imm; nohup ./cron.sh &。
+
+接下来浏览器打开你的网站，没问题的话就能看到一个活色生香的美女网站了！
